@@ -20,13 +20,13 @@ class SomeCell: UICollectionViewCell {
                 self?.textField.placeholder = placeholder
             })
             .disposed(by: self.disposeBag)
-
+        //this is here to preserve value on scroll
         withVM.textValue
             .take(1)
             .bind(to: self.textField.rx.text)
             .disposed(by: self.disposeBag)
 
-        self.textField.rx.text.debug("sdflajsd", trimOutput: false).bind(to: withVM.textValue)
+        self.textField.rx.text.bind(to: withVM.textValue)
             .disposed(by: self.disposeBag)
     }
 

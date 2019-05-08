@@ -32,13 +32,13 @@ class CollectionViewVM {
         //first two items are displayed always
         let vm1 = SomeCellVM(initialValue: self.someStateFromCell1.value, placeholder: "Nothing")
         //bind textValue from cellvm
-        vm1.textValue.skip(2).filter { $0 != nil }.map { $0 ?? "" }.debug("WTF", trimOutput: false).bind(to: self.someStateFromCell1).disposed(by: self.sectionDisposeBag)
+        vm1.textValue.skip(2).filter { $0 != nil }.map { $0 ?? "" }.bind(to: self.someStateFromCell1).disposed(by: self.sectionDisposeBag)
 
         let vm2 = SomeCellVM(initialValue: self.someStateFromCell2.value, placeholder: "Nothing")
         vm2.textValue.skip(2).filter { $0 != nil }.map { $0 ?? "" }.bind(to: self.someStateFromCell2).disposed(by: self.sectionDisposeBag)
 
         let firstSection = [vm1, vm2]
-        
+
         let secondSection = !someState ? [] : [SomeCellVM(initialValue: "", placeholder: "Nothing"),
             SomeCellVM(initialValue: "", placeholder: "Nothing")]
         return [SectionOfCustomData(items: firstSection + secondSection)]
@@ -49,6 +49,7 @@ class CollectionViewVM {
     }
 
     private func setupRx() {
+        //observe state and if some conditions are met, recreate sections
         Observable.combineLatest(someStateFromCell1.asObservable(), someStateFromCell2.asObservable()) { (val1, val2) -> Bool in
                 return val1 == "A" && val2 == "B"
             }
@@ -56,7 +57,8 @@ class CollectionViewVM {
             .subscribe(onNext: { [weak self] _ in
                 guard let self = self else { return }
                 self.bindSections()
-            }).disposed(by: self.disposeBag)
+            })
+            .disposed(by: self.disposeBag)
     }
 
 
