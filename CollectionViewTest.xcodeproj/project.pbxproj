@@ -69,7 +69,7 @@
 		281A63A5228190390098754F /* CollectionViewTest */ = {
 			isa = PBXGroup;
 			children = (
-				281A63BC2281937C0098754F /* Something */,
+				281A63BC2281937C0098754F /* List */,
 				281A63A6228190390098754F /* AppDelegate.swift */,
 				281A63AD2281903B0098754F /* Assets.xcassets */,
 				281A63AF2281903B0098754F /* LaunchScreen.storyboard */,
@@ -78,7 +78,7 @@
 			path = CollectionViewTest;
 			sourceTree = "<group>";
 		};
-		281A63BC2281937C0098754F /* Something */ = {
+		281A63BC2281937C0098754F /* List */ = {
 			isa = PBXGroup;
 			children = (
 				281A63BD228193C60098754F /* Cells */,
@@ -86,7 +86,7 @@
 				281A63B9228190B40098754F /* CollectionViewVC.xib */,
 				284757B72282F15A0022BB9A /* CollectionViewVM.swift */,
 			);
-			path = Something;
+			path = List;
 			sourceTree = "<group>";
 		};
 		281A63BD228193C60098754F /* Cells */ = {
