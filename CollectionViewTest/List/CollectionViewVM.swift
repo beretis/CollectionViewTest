@@ -32,10 +32,18 @@ class CollectionViewVM {
         //first two items are displayed always
         let vm1 = SomeCellVM(initialValue: self.someStateFromCell1.value, placeholder: "Nothing")
         //bind textValue from cellvm
-        vm1.textValue.skip(2).filter { $0 != nil }.map { $0 ?? "" }.bind(to: self.someStateFromCell1).disposed(by: self.sectionDisposeBag)
+        vm1.textValue.skip(2)
+            .filter { $0 != nil }
+            .map { $0 ?? "" }
+            .bind(to: self.someStateFromCell1)
+            .disposed(by: self.sectionDisposeBag)
 
         let vm2 = SomeCellVM(initialValue: self.someStateFromCell2.value, placeholder: "Nothing")
-        vm2.textValue.skip(2).filter { $0 != nil }.map { $0 ?? "" }.bind(to: self.someStateFromCell2).disposed(by: self.sectionDisposeBag)
+        vm2.textValue.skip(2)
+            .filter { $0 != nil }
+            .map { $0 ?? "" }
+            .bind(to: self.someStateFromCell2)
+            .disposed(by: self.sectionDisposeBag)
 
         let firstSection = [vm1, vm2]
 
@@ -54,13 +62,11 @@ class CollectionViewVM {
                 return val1 == "A" && val2 == "B"
             }
             .filter { $0 }
-            .subscribe(onNext: { [weak self] _ in
-                guard let self = self else { return }
-                self.bindSections()
-            })
+            .map { [unowned self] _ in
+                self.createSections(value1: self.someStateFromCell1.value, value2: self.someStateFromCell2.value)
+            }
+            .bind(to: self.sections)
             .disposed(by: self.disposeBag)
     }
-
-
 
 }
