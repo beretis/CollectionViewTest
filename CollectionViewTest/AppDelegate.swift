@@ -18,8 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         guard let window = self.window else { return false }
-        let vm = CollectionViewVM()
-        let vc = CollectionViewVC(vm: vm)
+        let vc = CollectionViewVC(viewModelFactory: { input in CollectionViewModel(initialStates: ["value1", "value2"], cellUpdate: input) })
         window.rootViewController = vc
 
         return true

@@ -14,12 +14,12 @@ class CollectionViewVC: UIViewController, UICollectionViewDelegate, UICollection
 
     @IBOutlet weak var collectionView: UICollectionView!
     //dependency
-    let viewModel: CollectionViewVM
+    let viewModelFactory: (Observable<(CellID, String)>) -> CollectionViewModel
     //private
     private var disposeBag = DisposeBag()
 
-    init(vm: CollectionViewVM) {
-        self.viewModel = vm
+    init(viewModelFactory: @escaping (Observable<(CellID, String)>) -> CollectionViewModel) {
+        self.viewModelFactory = viewModelFactory
         super.init(nibName: "CollectionViewVC", bundle: nil)
     }
 
@@ -27,22 +27,33 @@ class CollectionViewVC: UIViewController, UICollectionViewDelegate, UICollection
         fatalError("init(coder:) has not been implemented")
     }
 
-    let dataSource = RxCollectionViewSectionedReloadDataSource<SectionOfCustomData>(
-        configureCell: { dataSource, collectionView, indexPath, item in
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? SomeCell else { return UICollectionViewCell() }
-            cell.configure(withVM: item)
-            return cell
-    })
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setup()
+        setup()
     }
 
     private func setup() {
         collectionView.register(UINib(nibName: "SomeCell", bundle: nil), forCellWithReuseIdentifier: "Cell")
-        self.collectionView.delegate = self
-        self.viewModel.sections.bind(to: self.collectionView.rx.items(dataSource: self.dataSource)).disposed(by: self.disposeBag)
+        collectionView.delegate = self
+		let itemEdit = PublishSubject<(CellID, String)>()
+		let viewModel = viewModelFactory(itemEdit)
+		let dataSource = RxCollectionViewSectionedReloadDataSource<SectionOfCustomData>(
+			configureCell: { dataSource, collectionView, indexPath, item in
+				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as? SomeCell else { return UICollectionViewCell() }
+				let output = cell.configure(with: item, initial: viewModel.cellStates.map { $0[item.id]! })
+				output
+					.bind(to: itemEdit)
+					.disposed(by: cell.disposeBag)
+				return cell
+		})
+        viewModel.cells
+			.map { [SectionOfCustomData(items: $0)] }
+			.bind(to: collectionView.rx.items(dataSource: dataSource))
+			.disposed(by: disposeBag)
+
+		viewModel.cellStates
+			.bind(onNext: { print($0) })
+			.disposed(by: disposeBag)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -67,11 +78,11 @@ class CollectionViewVC: UIViewController, UICollectionViewDelegate, UICollection
 }
 
 struct SectionOfCustomData {
-    var items: [Item]
+    var items: [StaticCellState]
 }
 
 extension SectionOfCustomData: SectionModelType {
-    typealias Item = SomeCellVM
+    typealias Item = StaticCellState
 
     init(original: SectionOfCustomData, items: [Item]) {
         self = original

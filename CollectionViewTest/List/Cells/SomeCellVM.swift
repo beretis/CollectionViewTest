@@ -9,15 +9,9 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-class SomeCellVM {
-    //inout
-    let textValue: BehaviorRelay<String?>
-    //out
-    let placeholder: Driver<String>
+typealias CellID = UUID
 
-    init (initialValue: String?, placeholder: String) {
-        self.textValue = BehaviorRelay(value: initialValue)
-        self.placeholder = Driver.just(placeholder)
-    }
-
+struct StaticCellState {
+	let id: CellID
+	let placeholder: String
 }
