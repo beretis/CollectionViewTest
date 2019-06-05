@@ -9,6 +9,30 @@ import Foundation
 import RxSwift
 import RxCocoa
 
+
+struct CollectionViewModel {
+	let cells: Observable<[StaticCellState]>
+	let cellStates: Observable<[CellID: String]>
+}
+
+extension CollectionViewModel {
+	init(initialStates: [String], cellUpdate: Observable<(CellID, String)>) {
+		let cellIDs = Array(repeating: { UUID() }, count: initialStates.count).map { $0() }
+
+		let staticStates = cellIDs.map { StaticCellState(id: $0, placeholder: "Nothing") }
+		cells = .just(staticStates)
+
+		let keysAndValues = zip(cellIDs, initialStates)
+		let initialCellStates = Dictionary<CellID, String>.init(keysAndValues, uniquingKeysWith: { id, _ in id })
+		cellStates = cellUpdate
+			.scan(into: initialCellStates) { current, new in
+				current[new.0] = new.1
+			}
+			.startWith(initialCellStates)
+	}
+}
+
+/*
 class CollectionViewVM {
 
     // this viewmodel state, which is collected from cell inputs
@@ -70,3 +94,4 @@ class CollectionViewVM {
     }
 
 }
+*/

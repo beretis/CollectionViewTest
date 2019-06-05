@@ -11,24 +11,18 @@ import RxCocoa
 
 class SomeCell: UICollectionViewCell {
 
-    private var disposeBag = DisposeBag()
     @IBOutlet weak var textField: UITextField!
+	var disposeBag = DisposeBag()
 
-    public func configure(withVM: SomeCellVM) {
-        withVM.placeholder
-            .drive(onNext: { [weak self] placeholder in
-                self?.textField.placeholder = placeholder
-            })
-            .disposed(by: self.disposeBag)
-        //this is here to preserve value on scroll
-        withVM.textValue
-            .take(1)
-            .bind(to: self.textField.rx.text)
-            .disposed(by: self.disposeBag)
-
-        self.textField.rx.text.bind(to: withVM.textValue)
-            .disposed(by: self.disposeBag)
-    }
+	public func configure(with state: StaticCellState, initial: Observable<String>) -> Observable<(CellID, String)> {
+		textField.placeholder = state.placeholder
+		initial
+			.take(1)
+			.bind(to: textField.rx.text)
+			.disposed(by: disposeBag)
+		return textField.rx.text.orEmpty
+			.map { (state.id, $0) }
+	}
 
     override func prepareForReuse() {
         super.prepareForReuse()
